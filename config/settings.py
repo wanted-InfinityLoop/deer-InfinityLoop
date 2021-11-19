@@ -13,6 +13,10 @@ from pathlib import Path
 
 from my_settings import MY_SECRET_KEY, MY_DATABASES
 
+import pymysql
+
+pymysql.install_as_MySQLdb()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = MY_SECRET_KEY
@@ -31,7 +35,7 @@ INSTALLED_APPS = [
     "users",
     "vehicles",
     "areas",
-    "charges"
+    "charges",
 ]
 
 MIDDLEWARE = [
