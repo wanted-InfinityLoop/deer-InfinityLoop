@@ -8,7 +8,7 @@ class ServiceArea(models.Model):
     boundary      = models.PolygonField()
     center        = models.PointField()
     border_coords = models.MultiPointField()
-    charge        = models.ForeignKey("charges.Charge", on_delete=models.PROTECT)
+    charge        = models.ForeignKey("charges.Charge", null=True, on_delete=models.SET_NULL)
 
     class Meta:
         db_table = "service_areas"
@@ -18,7 +18,7 @@ class ForbiddenArea(models.Model):
     id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     boundary      = models.PolygonField()
     border_coords = models.MultiPointField()
-    service_area  = models.ForeignKey(ServiceArea, on_delete=models.PROTECT)
+    service_area  = models.ForeignKey(ServiceArea, on_delete=models.CASCADE)
 
     class Meta:
         db_table = "forbidden_areas"
@@ -29,7 +29,7 @@ class ParkingArea(models.Model):
     center_lat    = models.DecimalField(max_digits=8, decimal_places=6)
     center_lng    = models.DecimalField(max_digits=9, decimal_places=6)
     radius        = models.FloatField()
-    service_area  = models.ForeignKey(ServiceArea, on_delete=models.PROTECT)
+    service_area  = models.ForeignKey(ServiceArea, on_delete=models.CASCADE)
 
     class Meta:
         db_table = "parking_areas"
