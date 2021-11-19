@@ -4,11 +4,12 @@ from django.contrib.gis.db import models
 
 
 class ServiceArea(models.Model):
-    id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    boundary      = models.PolygonField()
-    center        = models.PointField()
-    border_coords = models.MultiPointField()
-    charge        = models.ForeignKey("charges.Charge", null=True, on_delete=models.SET_NULL)
+    id                    = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    boundary              = models.PolygonField()
+    center                = models.PointField()
+    border_coords         = models.MultiPointField()
+    charge                = models.ForeignKey("charges.Charge", null=True, on_delete=models.SET_NULL)
+    discount_or_penalties = models.ManyToManyField("charges.DiscountOrPenalties", related_name="service_areas")
 
     class Meta:
         db_table = "service_areas"
