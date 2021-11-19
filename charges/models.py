@@ -23,14 +23,13 @@ class Type(models.Model):
         DISCOUNT = 1
         PENALTY  = 2
 
-    id   = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=16)
 
     class Meta:
             db_table = "types"
 
 class DiscountOrPenalties(models.Model):
-    id          = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id          = models.CharField(primary_key=True, unique=True, max_length=16)
     number      = models.PositiveIntegerField()
     description = models.CharField(max_length=32)
     unit        = models.ForeignKey(Unit, on_delete=models.PROTECT)
