@@ -7,3 +7,7 @@ def phone_number_validator(phone_number):
 
 def email_validator(email):
     return re.compile("^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$").match(email)
+
+
+def code_validator(first, code):
+    return re.compile(f"{first}"+"-\S{1}-\d{1}").match(code)
