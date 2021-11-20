@@ -1,5 +1,4 @@
 from django.urls import path
-
 from charges.views import DiscountView, PenaltyView
 
 urlpatterns = [
