@@ -2,6 +2,8 @@ import uuid
 
 from django.db import models
 
+from core.managers import CustomModelManager
+
 
 class Vehicle(models.Model):
     id           = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -21,6 +23,7 @@ class Usage(models.Model):
     end_at        = models.DateTimeField(null=True)    
     charge_amount = models.PositiveIntegerField(default=0)
     user          = models.ForeignKey("users.User", null=True, on_delete=models.SET_NULL)
+    objects       = CustomModelManager()
 
     class Meta:
         db_table = "usages"

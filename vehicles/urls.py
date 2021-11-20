@@ -1,6 +1,7 @@
-from django.urls import path
-from vehicles    import views
+from django.urls    import path
+from vehicles.views import LendKickboardView, ReturnKickboardView
 
 urlpatterns = [
-    path("/lend", views.LendKickboardView.as_view()),
+    path("/lend", LendKickboardView.as_view()),
+    path("/return/<str:vehicle_id>", ReturnKickboardView.as_view())
 ]

@@ -28,8 +28,8 @@ class ForbiddenArea(models.Model):
 
 class ParkingArea(models.Model):
     id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    center_lat    = models.DecimalField(max_digits=8, decimal_places=6)
-    center_lng    = models.DecimalField(max_digits=9, decimal_places=6)
+    center_lat    = models.DecimalField(max_digits=20, decimal_places=17)
+    center_lng    = models.DecimalField(max_digits=20, decimal_places=17)
     radius        = models.FloatField()
     service_area  = models.ForeignKey(ServiceArea, on_delete=models.CASCADE)
 

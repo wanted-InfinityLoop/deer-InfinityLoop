@@ -4,9 +4,9 @@ import jwt
 
 from django.test import TestCase, Client
 
-from users.models   import User, Role
-from charges.models import Unit, Type, DiscountOrPenalties
-from my_settings    import MY_SECRET_KEY, ALGORITHM
+from users.models    import User, Role
+from charges.models  import Unit, Type, DiscountOrPenalties
+from my_settings     import MY_SECRET_KEY, ALGORITHM
 
 
 class DiscountViewTest(TestCase):
