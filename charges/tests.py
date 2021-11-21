@@ -43,7 +43,7 @@ class DiscountViewTest(TestCase):
 
         DiscountOrPenalties.objects.create(id=1, number=30, description="주차존 반납", unit_id=1, type_id=1)
 
-    def TearDown(self):
+    def tearDown(self):
         DiscountOrPenalties.objects.all().delete()
         Unit.objects.all().del다ete()
         Type.objects.all().delete()
@@ -283,7 +283,7 @@ class PenaltyViewTest1(TestCase):
 
         DiscountOrPenalties.objects.create(id=1, number=6000, description="반납 금지 지역 반납", unit_id=1, type_id=1)
 
-    def TearDown(self):
+    def tearDown(self):
         DiscountOrPenalties.objects.all().delete()
         Unit.objects.all().delete()
         Type.objects.all().delete()

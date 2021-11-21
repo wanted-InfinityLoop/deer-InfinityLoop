@@ -45,7 +45,7 @@ class ServiceAreaView(View):
                         service_area.save()
 
             return JsonResponse({"message": f"{service_area.name} has created!"}, status=201)
-
+        
         except KeyError:
             return JsonResponse({"message": "KEY_ERROR"}, status=400)
 
@@ -84,6 +84,32 @@ class ServiceAreaDPView(View):
 
         except ServiceArea.DoesNotExist:
             return JsonResponse({"message": "RESION_NOT_EXIST"}, status=404) 
-        
+
+        except KeyError:
+            return JsonResponse({"message": "KEY_ERROR"}, status=400)
+
+    @login_decorator       
+    def delete(self, request):
+        try:
+            if request.user.role_id != Role.Type.ADMIN.value:
+                return JsonResponse({"message": "UNAUTHORIZED"}, status = 401)
+
+            data    = json.loads(request.body)
+            dp_code = data["code"]
+
+            service_area = ServiceArea.objects.get(name=data["region"]) 
+
+            if not service_area.discount_or_penalties.filter(id=dp_code).exists():
+                return JsonResponse({"message": "NOT_FOUND_DP_THIS_SERVICE_AREA"}, status = 404)   
+
+            dp_entity = DiscountOrPenalties.objects.get(id=dp_code)
+
+            service_area.discount_or_penalties.remove(dp_entity)
+
+            return JsonResponse({"message": f"{dp_code} is removed"}, status=200)
+
+        except ServiceArea.DoesNotExist:
+            return JsonResponse({"message": "SERVICE_AREA_DOES_NOT_EXIST"}, status=404)
+
         except KeyError:
             return JsonResponse({"message": "KEY_ERROR"}, status=400)
