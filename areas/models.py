@@ -5,6 +5,7 @@ from django.contrib.gis.db import models
 
 class ServiceArea(models.Model):
     id                    = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name                  = models.CharField(max_length=32, null=True)
     boundary              = models.PolygonField()
     center                = models.PointField()
     border_coords         = models.MultiPointField()
