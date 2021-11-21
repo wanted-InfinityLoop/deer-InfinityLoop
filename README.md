@@ -46,9 +46,9 @@
   - 프로젝트 빌드, 자세한 실행 방법 명시
   - 구현 방법과 이유에 대한 간략한 설명
   - 완료된 시스템이 배포된 서버의 주소
-  - Swagger나 Postman을 통한 API 테스트할때 필요한 상세 방법
+  - `Swagger`나 `Postman`을 통한 API 테스트할때 필요한 상세 방법
   - 해당 과제를 진행하면서 회고 내용 블로그 포스팅
-- Swagger나 Postman을 이용하여 API 테스트 가능하도록 구현
+- `Swagger`나 `Postman`을 이용하여 API 테스트 가능하도록 구현
 
 ### **[개발 요구 사항]**
 
@@ -97,9 +97,9 @@ API URL : http://3.38.118.39:8000
 
 # ⚒️ 기술 환경 및 tools
 
-- Back-End: Python 3.9.7, Django 3.2.9
-- Deploy: AWS EC2, RDS
-- ETC: Git, Github, Postman
+- Back-End: `Python 3.9.7`, `Django 3.2.9`, `GDAL 3.0.2`
+- Deploy: AWS `EC2`, `RDS`
+- ETC: `Git`, `Github`, `Postman`
 
 <br>
 <br>
@@ -663,14 +663,50 @@ http://3.38.118.39:8000/areas/service
 
 # ➕ 기능 구현 추가설명
 
-### [111111]
+### query debugger를 이용한 쿼리 최적화
 
 ![query](https://user-images.githubusercontent.com/77820352/142777685-1a752bf3-8fd9-42a3-9ccb-b31c164daf82.png)
 <br>
-
-### [222222]
+`core.debuggers.py` 에 다음과 같이 작성한다.
 
 <br>
+```python
+from functools import wraps
+from time      import perf_counter as prf_cnt #코드 실행시간 측정
+
+from django.db   import connection, reset_queries
+from django.conf import settings
+
+def query_debugger(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        reset_queries()
+        number_of_start_queries = len(connection.queries)
+        start                   = prf_cnt()
+        result                  = func(*args, **kwargs)
+        end                     = prf_cnt()
+        number_of_end_queries   = len(connection.queries)
+        print("========================================")
+        print(f"function : {func.__name__}")
+        print(f"number of queries : {number_of_end_queries - number_of_start_queries}")
+        print(f"finished in : {(end - start):.2f}s")
+        return result
+    return wrapper
+```
+
+이 모듈을 `view`의 각 메서드에 데코레이터로 연결하면 해당 메서드에서 평가되는 쿼리의 개수를 다음과 같이 확인할 수 있다.
+<br>
+`query_debugger` 를 사용해서 쿼리를 최적화하는데 전략을 잘 구성할 수 있다.
+
+### geojson을 이용하여 GEOSGeometry 객체 저장하기
+
+`geojson.io` 에서 원하는 지역에 도형(`polygon`) 및 점(`point`)을 생성하여 `geojson` 형식의 파일을 생성하고 unit test에서 `geojson` 파일을 읽어서 각 `feature`를 생성하였다.
+![geo](https://user-images.githubusercontent.com/77820352/142777936-05196cea-1887-4125-abda-0363a7d63092.png)
+<br>
+
+### 두 feature 사이의 거리 계산
+
+haversine 라이브러리를 이용하여 WGS84 좌표계 시스템으로 되어있는 두 좌표간 거리를 계산해 주었고, 지역을 벗어난 킥보드가 해당 지역으로부터 얼마나 떨어져 있는지 계산하기 위해 epsg 5174 좌표로 변환한뒤 킥보드 반납 지점(Point)과 지역(Polygon)의 거리를 계산해 주었다.
 
 # 🔖 설치 및 실행 방법
 
