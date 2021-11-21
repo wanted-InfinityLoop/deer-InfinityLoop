@@ -670,6 +670,7 @@ http://3.38.118.39:8000/areas/service
 `core.debuggers.py` 에 다음과 같이 작성한다.
 
 <br>
+
 ```python
 from functools import wraps
 from time      import perf_counter as prf_cnt #코드 실행시간 측정
