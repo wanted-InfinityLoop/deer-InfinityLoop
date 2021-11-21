@@ -13,23 +13,25 @@ from core.utils      import login_decorator
 
 class LendKickboardView(View):
     @login_decorator
-    def post(self, request):
+    def post(self, request, vehicle_id):
         try:
-            data      = json.loads(request.body)
-            deer_name = data["deer_name"]
+            vehicle_id = vehicle_id
+
+            if Usage.objects.filter(vehicle_id=vehicle_id, end_at__isnull=True).exists():
+                return JsonResponse({"message": "VEHICLE_ALREADY_IN_USE"}, status=409)
 
             Usage.objects.create(
-                vehicle = Vehicle.objects.get(deer_name=deer_name),
+                vehicle = Vehicle.objects.get(id=vehicle_id),
                 user_id = request.user.id
             )
 
             return JsonResponse({"message": "SUCCESS"}, status=201)
-
-        except KeyError:
-            return JsonResponse({"message": "KEY_ERROR"}, status=400)
         
         except Vehicle.DoesNotExist:
             return JsonResponse({"message": "VEHICLE_DOES_NOT_EXIST"}, status=404)
+
+        except ValidationError:
+            return JsonResponse({"message": "UUID_FORMAT_ERROR"}, status=400)
 
 
 class ReturnKickboardView(View):
