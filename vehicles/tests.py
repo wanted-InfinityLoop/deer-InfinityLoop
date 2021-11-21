@@ -24,9 +24,13 @@ class VehicleViewTest(TestCase):
             border_coords=MultiPoint(Point(0, 0), Point(1, 1))
             )
         
-        Vehicle.objects.create(
-            id=1,
-            deer_name="씽씽이",
+        self.vehicle_1 = Vehicle.objects.create(
+            deer_name="VFL-ADR",
+            service_area=ServiceArea.objects.get(id=1)
+        )
+
+        self.vehicle_2 = Vehicle.objects.create(
+            deer_name="RJQ-FOV",
             service_area=ServiceArea.objects.get(id=1)
         )
         
@@ -41,6 +45,12 @@ class VehicleViewTest(TestCase):
             {"user_id": str(user1.id)}, MY_SECRET_KEY, ALGORITHM
         )
 
+        Usage.objects.create(
+            start_at=datetime.now(),
+            vehicle=self.vehicle_2,
+            user=user1
+        )
+
     def tearDown(self):
         ServiceArea.objects.all().delete()
         Vehicle.objects.all().delete()
@@ -49,42 +59,33 @@ class VehicleViewTest(TestCase):
         
     def test_post_usage_success(self):
         header = {"HTTP_Authorization": f"Bearer {self.access_token1}"}
+   
+        response = self.client.post(
+            f"/vehicles/lend/{self.vehicle_1.id}", content_type="application/json", **header
+        )
         
-        data = {
-            "deer_name" : "씽씽이",
-            }
-        
-        response = self.client.post("/vehicles/lend",json.dumps(data),
-                                    content_type="application/json", **header)
-        
-        self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(),{"message": "SUCCESS"})
-        
-    def test_post_usage_fail_key_error(self):
-        header = {"HTTP_Authorization": f"Bearer {self.access_token1}"}
-        
-        data = {
-            "deer_nam" : "씽씽이",
-            }
-        
-        response = self.client.post("/vehicles/lend",json.dumps(data),
-                                    content_type="application/json", **header)
-        
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json(),{"message": "KEY_ERROR"})
+        self.assertEqual(response.status_code, 201)
 
-    def test_post_usage_fail_vehicle_doesNotExist(self):
+    def test_post_usage_fail_vehicle_does_not_exist(self):
         header = {"HTTP_Authorization": f"Bearer {self.access_token1}"}
+
+        response = self.client.post(
+            f"/vehicles/lend/1b4b08d9-8888-488e-ad75-29670ab4069b", content_type="application/json", **header
+        )
         
-        data = {
-            "deer_name" : "쌩쌩이",
-            }
-        
-        response = self.client.post("/vehicles/lend",json.dumps(data),
-                                    content_type="application/json", **header)
-        
-        self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json(),{"message": "VEHICLE_DOES_NOT_EXIST"})
+        self.assertEqual(response.status_code, 404)
+
+    def test_post_usage_fail_usage_history_already_exist(self):
+        header = {"HTTP_Authorization": f"Bearer {self.access_token1}"}
+
+        response = self.client.post(
+            f"/vehicles/lend/{self.vehicle_2.id}", content_type="application/json", **header
+        )
+        
+        self.assertEqual(response.json(),{"message": "VEHICLE_ALREADY_IN_USE"})
+        self.assertEqual(response.status_code, 409)
 
 
 class ReturnKickboardViewTest(TestCase):
@@ -209,7 +210,7 @@ class ReturnKickboardViewTest(TestCase):
             f'/vehicles/return/{self.vehicle_1.id}', json.dumps(data), content_type="application/json", **header
         )
 
-        self.assertEqual(response.json(), {"message": "CREATED"})
+        self.assertEqual(response.json(), {"message": "UPDATED"})
         self.assertEqual(response.status_code, 201)
 
     def test_return_kickboard_view_patch_value_error(self):
