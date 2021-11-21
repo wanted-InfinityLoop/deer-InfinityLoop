@@ -18,7 +18,6 @@ class ServiceAreaView(View):
         try:
             if request.user.role_id != Role.Type.ADMIN.value:
                 return JsonResponse({"message": "UNAUTHORIZED"}, status=401)
-
             data = json.loads(request.body)
             point_list = []
 
@@ -58,3 +57,33 @@ class ServiceAreaView(View):
 
         except DiscountOrPenalties.DoesNotExist:
             return JsonResponse({"message": "DISCOUNT_OR_PENALTIES_DOES_NOT_EXIST"}, status=404)
+
+
+class ServiceAreaDPView(View):
+    @login_decorator
+    def post(self, request):
+        try:
+            if request.user.role_id != Role.Type.ADMIN.value:
+                return JsonResponse({"message": "UNAUTHORIZED"}, status=401)
+
+            data   = json.loads(request.body)
+
+            area = ServiceArea.objects.get(name=data["region"])
+            
+            if area.discount_or_penalties.filter(id=data["code"]).exists():
+                return JsonResponse({"message": "CODE_ALREADY_EXIST"}, status=400)
+            
+            charge_event = DiscountOrPenalties.objects.get(id=data["code"])
+
+            area.discount_or_penalties.add(charge_event)
+
+            return JsonResponse({"message": "SUCCESS"}, status=200)
+
+        except DiscountOrPenalties.DoesNotExist:
+            return JsonResponse({"message": "CODE_NOT_EXIST"}, status=404) 
+
+        except ServiceArea.DoesNotExist:
+            return JsonResponse({"message": "RESION_NOT_EXIST"}, status=404) 
+        
+        except KeyError:
+            return JsonResponse({"message": "KEY_ERROR"}, status=400)
