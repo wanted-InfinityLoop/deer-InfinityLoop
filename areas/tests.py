@@ -7,7 +7,7 @@ from django.contrib.gis.geos import Point, Polygon, MultiPoint
 
 from users.models   import User, Role
 from areas.models   import ServiceArea
-from charges.models import Charge, Unit, Type, DiscountOrPenalties
+from charges.models import Unit, Type, DiscountOrPenalties, Charge
 from my_settings    import MY_SECRET_KEY, ALGORITHM
 
 
@@ -152,3 +152,63 @@ class AreaServiceTest(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"message": "KEY_ERROR"})
+
+    def test_delete_area_event_success(self):
+        header = {"HTTP_Authorization": f"Bearer {self.admin_token}"}
+
+        data = {"code": "D-P-1", "region": "강남"}
+
+        response = self.client.delete(
+            "/areas/service", json.dumps(data), content_type="application/json", **header
+        )
+
+        self.assertEqual(response.json(), {"message": "D-P-1 is removed"})
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_area_event_unauthorized_error(self):
+        header = {"HTTP_Authorization": f"Bearer {self.customer_token}"}
+
+        data = {"code": "D-P-1", "region": "강남"}
+
+        response = self.client.delete(
+            "/areas/service", json.dumps(data), content_type="application/json", **header
+        )
+
+        self.assertEqual(response.json(), {"message": "UNAUTHORIZED"})
+        self.assertEqual(response.status_code, 401)
+
+    def test_delete_area_event_invalid_code(self):
+        header = {"HTTP_Authorization": f"Bearer {self.admin_token}"}
+
+        data = {"code": "D-P-2", "region": "강남"}
+
+        response = self.client.delete(
+            "/areas/service", json.dumps(data), content_type="application/json", **header
+        )
+
+        self.assertEqual(response.json(), {"message": "NOT_FOUND_DP_THIS_SERVICE_AREA"})
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_area_event_invalid_region(self):
+        header = {"HTTP_Authorization": f"Bearer {self.admin_token}"}
+
+        data = {"code": "D-P-1", "region": "신촌"}
+
+        response = self.client.delete(
+            "/areas/service", json.dumps(data), content_type="application/json", **header
+        )
+
+        self.assertEqual(response.json(), {"message": "SERVICE_AREA_DOES_NOT_EXIST"})
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_area_event_key_error(self):
+        header = {"HTTP_Authorization": f"Bearer {self.admin_token}"}
+
+        data = {"region": "강남"}
+
+        response = self.client.delete(
+            "/areas/service", json.dumps(data), content_type="application/json", **header
+        )
+
+        self.assertEqual(response.json(), {"message": "KEY_ERROR"})
+        self.assertEqual(response.status_code, 400)
